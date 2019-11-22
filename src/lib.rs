@@ -110,6 +110,7 @@ pub fn reformat_node(node: &SyntaxNode) -> FmtDiff {
     let spacing = rules::spacing();
     let indentation = rules::indentation();
     engine::format(&spacing, &indentation, node)
+    // TODO: write some shit that's parallel to engine
 }
 
 pub fn reformat_string(text: &str) -> String {
