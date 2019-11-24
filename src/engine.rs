@@ -5,7 +5,7 @@ mod indentation;
 mod spacing;
 mod fixes;
 
-use rnix::{NodeOrToken, SmolStr, SyntaxKind, SyntaxNode, TextRange};
+use rnix::{SmolStr, SyntaxKind, SyntaxNode, TextRange};
 use std::collections::HashMap;
 
 use crate::{
@@ -89,18 +89,19 @@ pub(crate) fn format(
 }
 
 fn attr_set_binds_to_hashmap(node: &SyntaxNode) -> HashMap<String, String> {
-    let mut hm = HashMap::new();
+    let hm = HashMap::new();
 
     let binds = node.children();
 
     for bind in binds {
-        println!("is this not bind {:?}", bind);
-        bind_to_option_pair(&bind);
+        let pair = bind_to_option_pair(&bind);
+        println!("pair: {:?}", pair);
     }
 
     hm
 }
 
+#[derive(Debug)]
 struct Pair {
     key: String,
     value: String,
@@ -108,21 +109,10 @@ struct Pair {
 
 fn bind_to_option_pair(node: &SyntaxNode) -> Option<Pair> {
     let mut children = node.children();
-    let identifier = children.next().and_then(|x| get_key_ident_string(&x));
-    let value = children.next().and_then(|x| get_string_string(&x));
+    let key = children.next().and_then(|x| get_key_ident_string(&x))?;
+    let value = children.next().and_then(|x| get_string_string(&x))?;
 
-    println!("here is my bind");
-    dbg!(identifier);
-    dbg!(value);
-
-    // todo: form pair of values above
-
-    // if (some conds and shit) {
-    //     Just(Pair { key, value });
-    // } else {
-    // None
-    // }
-    None
+    Some(Pair { key, value })
 }
 
 fn get_node_attr_set(node: &SyntaxNode) -> Option<&SyntaxNode> {
