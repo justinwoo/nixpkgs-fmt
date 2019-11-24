@@ -5,7 +5,7 @@ mod indentation;
 mod spacing;
 mod fixes;
 
-use rnix::{SmolStr, SyntaxNode, TextRange};
+use rnix::{SmolStr, SyntaxNode, TextRange, NodeOrToken, SyntaxKind};
 
 use crate::{
     dsl::{IndentDsl, RuleName, SpacingDsl},
@@ -72,8 +72,8 @@ pub(crate) fn format(
     let mut my_model = FmtModel::new(root.clone());
     for element in walk_non_whitespace(root) {
         match element {
-            rnix::NodeOrToken::Node(node) => match node.kind() {
-                rnix::SyntaxKind::NODE_ATTR_SET => {
+            NodeOrToken::Node(node) => match node.kind() {
+                SyntaxKind::NODE_ATTR_SET => {
                     // how od i modify this
                     dbg!(node.clone());
                     let range = node.clone().text_range();
@@ -88,6 +88,8 @@ pub(crate) fn format(
             _ => ()
         }
     }
+
+    dbg!(my_model.into_diff().edits);
 
     model.into_diff()
 }
