@@ -101,9 +101,8 @@ fn attr_set_binds_to_hashmap(node: &SyntaxNode) -> HashMap<String, String> {
     let binds = node.children();
 
     for bind in binds {
-        for inner in bind.children() {
-            bind_to_option_pair(&inner);
-        }
+        println!("is this not bind {:?}", bind);
+        bind_to_option_pair(&bind);
     }
 
     hm
@@ -116,13 +115,14 @@ struct Pair {
 
 fn bind_to_option_pair(node: &SyntaxNode) -> Option<Pair> {
     let mut children = node.children();
+    let identifier = children.next().and_then(|x| get_key_ident_string(&x));
+    let value = children.next().and_then(|x| get_string_string(&x));
 
-    let identifier = children.nth(0).and_then(|x| get_ident_string(&x));
+    println!("here is my bind");
+    dbg!(identifier);
+    dbg!(value);
 
-    let value = children.nth(1).and_then(|x| Some(x));
-
-    // if child 0 is identifier, extract identifier string from it
-    // if child 1 is string, extract string value from it
+    // todo: form pair of values above
 
     // if (some conds and shit) {
     //     Just(Pair { key, value });
@@ -131,20 +131,36 @@ fn bind_to_option_pair(node: &SyntaxNode) -> Option<Pair> {
     // }
     None
 }
-
-fn get_ident_string(node: &SyntaxNode) -> Option<String> {
-    dbg!(node);
+fn get_node_key(node: &SyntaxNode) -> Option<&SyntaxNode> {
     match node.kind() {
-        SyntaxKind::NODE_IDENT => node.children().nth(0).and_then(|inner| match inner.kind() {
-            SyntaxKind::NODE_STRING => {
-                println!("what do i do with inner: {:?}", inner);
-                None
-            }
-            _ => None,
-        }),
-        _ => None,
+      SyntaxKind::NODE_KEY => {
+          Some(node)
+      },
+      _ => None
     }
 }
+
+fn get_node_string(node: &SyntaxNode) -> Option<&SyntaxNode> {
+    match node.kind() {
+      SyntaxKind::NODE_STRING => {
+          Some(node)
+      },
+      _ => None
+    }
+}
+
+fn node_to_string(node: &SyntaxNode) -> String {
+    node.text().to_string()
+}
+
+fn get_key_ident_string(node: &SyntaxNode) -> Option<String> {
+    get_node_key(node).map(node_to_string)
+}
+
+fn get_string_string(node: &SyntaxNode) -> Option<String> {
+    get_node_string(node).map(node_to_string)
+}
+
 
 impl FmtDiff {
     fn replace(&mut self, range: TextRange, text: SmolStr, reason: Option<RuleName>) {
