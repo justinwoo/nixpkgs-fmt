@@ -5,7 +5,8 @@ mod indentation;
 mod spacing;
 mod fixes;
 
-use rnix::{SmolStr, SyntaxNode, TextRange, NodeOrToken, SyntaxKind};
+use rnix::{NodeOrToken, SmolStr, SyntaxKind, SyntaxNode, TextRange};
+use std::collections::HashMap;
 
 use crate::{
     dsl::{IndentDsl, RuleName, SpacingDsl},
@@ -74,24 +75,75 @@ pub(crate) fn format(
         match element {
             NodeOrToken::Node(node) => match node.kind() {
                 SyntaxKind::NODE_ATTR_SET => {
-                    // how od i modify this
-                    dbg!(node.clone());
+                    attr_set_binds_to_hashmap(&node);
+
                     let range = node.clone().text_range();
                     let delete = TextRange::offset_len(range.start(), range.len());
                     let insert = "replacement".into();
-                    my_model.raw_edit(AtomEdit { delete, insert});
+                    my_model.raw_edit(AtomEdit { delete, insert });
                     // model.raw_edit(AtomEdit { delete, insert});
                     ()
-                },
+                }
                 _ => (),
             },
-            _ => ()
+            _ => (),
         }
     }
 
     dbg!(my_model.into_diff().edits);
 
     model.into_diff()
+}
+
+fn attr_set_binds_to_hashmap(node: &SyntaxNode) -> HashMap<String, String> {
+    let mut hm = HashMap::new();
+
+    let binds = node.children();
+
+    for bind in binds {
+        for inner in bind.children() {
+            bind_to_option_pair(&inner);
+        }
+    }
+
+    hm
+}
+
+struct Pair {
+    key: String,
+    value: String,
+}
+
+fn bind_to_option_pair(node: &SyntaxNode) -> Option<Pair> {
+    let mut children = node.children();
+
+    let identifier = children.nth(0).and_then(|x| get_ident_string(&x));
+
+    let value = children.nth(1).and_then(|x| Some(x));
+
+    // if child 0 is identifier, extract identifier string from it
+    // if child 1 is string, extract string value from it
+
+    // if (some conds and shit) {
+    //     Just(Pair { key, value });
+    // } else {
+    // None
+    // }
+    None
+}
+
+fn get_ident_string(node: &SyntaxNode) -> Option<String> {
+    dbg!(node);
+    match node.kind() {
+        SyntaxKind::NODE_IDENT => node.children().nth(0).and_then(|inner| match inner.kind() {
+            SyntaxKind::NODE_STRING => {
+                println!("what do i do with inner: {:?}", inner);
+                None
+            }
+            _ => None,
+        }),
+        _ => None,
+    }
 }
 
 impl FmtDiff {
