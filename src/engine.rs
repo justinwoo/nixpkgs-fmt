@@ -66,7 +66,27 @@ pub(crate) fn format(
     // Finally, do custom touch-ups like re-indenting of string literals and
     // replacing URLs with string literals.
     for element in walk_non_whitespace(root) {
-        fixes::fix(element, &mut model, &anchor_set)
+        fixes::fix(element, &mut model, &anchor_set);
+    }
+
+    let mut my_model = FmtModel::new(root.clone());
+    for element in walk_non_whitespace(root) {
+        match element {
+            rnix::NodeOrToken::Node(node) => match node.kind() {
+                rnix::SyntaxKind::NODE_ATTR_SET => {
+                    // how od i modify this
+                    dbg!(node.clone());
+                    let range = node.clone().text_range();
+                    let delete = TextRange::offset_len(range.start(), range.len());
+                    let insert = "replacement".into();
+                    my_model.raw_edit(AtomEdit { delete, insert});
+                    // model.raw_edit(AtomEdit { delete, insert});
+                    ()
+                },
+                _ => (),
+            },
+            _ => ()
+        }
     }
 
     model.into_diff()
