@@ -72,22 +72,15 @@ pub(crate) fn format(
 
     let mut my_model = FmtModel::new(root.clone());
     for element in walk_non_whitespace(root) {
-        match element {
-            NodeOrToken::Node(node) => match node.kind() {
-                SyntaxKind::NODE_ATTR_SET => {
-                    attr_set_binds_to_hashmap(&node);
+        element.as_node().and_then(|x| get_node_attr_set(&x)).map(|node| {
+            attr_set_binds_to_hashmap(&node);
 
-                    let range = node.clone().text_range();
-                    let delete = TextRange::offset_len(range.start(), range.len());
-                    let insert = "replacement".into();
-                    my_model.raw_edit(AtomEdit { delete, insert });
-                    // model.raw_edit(AtomEdit { delete, insert});
-                    ()
-                }
-                _ => (),
-            },
-            _ => (),
-        }
+            // example edit
+            let range = node.clone().text_range();
+            let delete = TextRange::offset_len(range.start(), range.len());
+            let insert = "replacement".into();
+            my_model.raw_edit(AtomEdit { delete, insert });
+        });
     }
 
     dbg!(my_model.into_diff().edits);
@@ -131,21 +124,25 @@ fn bind_to_option_pair(node: &SyntaxNode) -> Option<Pair> {
     // }
     None
 }
+
+fn get_node_attr_set(node: &SyntaxNode) -> Option<&SyntaxNode> {
+    match node.kind() {
+        SyntaxKind::NODE_ATTR_SET => Some(node),
+        _ => None,
+    }
+}
+
 fn get_node_key(node: &SyntaxNode) -> Option<&SyntaxNode> {
     match node.kind() {
-      SyntaxKind::NODE_KEY => {
-          Some(node)
-      },
-      _ => None
+        SyntaxKind::NODE_KEY => Some(node),
+        _ => None,
     }
 }
 
 fn get_node_string(node: &SyntaxNode) -> Option<&SyntaxNode> {
     match node.kind() {
-      SyntaxKind::NODE_STRING => {
-          Some(node)
-      },
-      _ => None
+        SyntaxKind::NODE_STRING => Some(node),
+        _ => None,
     }
 }
 
@@ -160,7 +157,6 @@ fn get_key_ident_string(node: &SyntaxNode) -> Option<String> {
 fn get_string_string(node: &SyntaxNode) -> Option<String> {
     get_node_string(node).map(node_to_string)
 }
-
 
 impl FmtDiff {
     fn replace(&mut self, range: TextRange, text: SmolStr, reason: Option<RuleName>) {
