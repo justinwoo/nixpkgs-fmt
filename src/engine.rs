@@ -73,7 +73,8 @@ pub(crate) fn format(
     let mut my_model = FmtModel::new(root.clone());
     for element in walk_non_whitespace(root) {
         element.as_node().and_then(|x| get_node_attr_set(&x)).map(|node| {
-            attr_set_binds_to_hashmap(&node);
+            let set = attr_set_binds_to_hashmap(&node);
+            println!("attr set: {:?}", set);
 
             // example edit
             let range = node.clone().text_range();
@@ -89,13 +90,13 @@ pub(crate) fn format(
 }
 
 fn attr_set_binds_to_hashmap(node: &SyntaxNode) -> HashMap<String, String> {
-    let hm = HashMap::new();
+    let mut hm = HashMap::new();
 
     let binds = node.children();
-
     for bind in binds {
-        let pair = bind_to_option_pair(&bind);
-        println!("pair: {:?}", pair);
+        if let Some(pair) = bind_to_option_pair(&bind) {
+            hm.insert(pair.key, pair.value);
+        }
     }
 
     hm
