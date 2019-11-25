@@ -25,7 +25,7 @@ use crate::{dsl::RuleName, engine::FmtDiff, tree_utils::preceding_tokens, AtomEd
 /// We maintain the invariant that no two `SpaceBlock`s are directly adjoint to
 /// each other.
 #[derive(Debug)]
-pub(super) struct FmtModel {
+pub struct FmtModel {
     original_node: SyntaxNode,
     /// We store `SpaceBlock`s in array. With this setup, we can refer to a
     /// specific block by index, dodging many lifetime issues.
@@ -129,7 +129,7 @@ pub(super) enum SpaceBlockOrToken<'a> {
 }
 
 impl FmtModel {
-    pub(super) fn new(original_node: SyntaxNode) -> FmtModel {
+    pub fn new(original_node: SyntaxNode) -> FmtModel {
         FmtModel {
             original_node,
             blocks: vec![],
@@ -139,7 +139,7 @@ impl FmtModel {
         }
     }
 
-    pub(super) fn into_diff(self) -> FmtDiff {
+    pub fn into_diff(self) -> FmtDiff {
         let mut diff = FmtDiff { original_node: self.original_node.to_owned(), edits: vec![] };
         for block in self.blocks {
             if let Some(change) = block.change {
@@ -262,7 +262,7 @@ impl FmtModel {
         }
     }
 
-    pub(super) fn raw_edit(&mut self, edit: AtomEdit) {
+    pub fn raw_edit(&mut self, edit: AtomEdit) {
         self.fixes.push(edit)
     }
 

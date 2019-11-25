@@ -246,7 +246,7 @@ pub(crate) enum IndentValue {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct RuleName(&'static str);
+pub struct RuleName(&'static str);
 
 impl fmt::Display for RuleName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

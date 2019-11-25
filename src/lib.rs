@@ -1,9 +1,9 @@
 #[macro_use]
-mod dsl;
-mod engine;
-mod rules;
-mod tree_utils;
-mod pattern;
+pub mod dsl;
+pub mod engine;
+pub mod rules;
+pub mod tree_utils;
+pub mod pattern;
 
 use std::{borrow::Cow, fmt, fmt::Formatter};
 
@@ -16,13 +16,13 @@ use crate::dsl::RuleName;
 /// From this Diff, you can get either the resulting `String`, or the
 /// reformatted syntax node.
 #[derive(Debug)]
-pub(crate) struct FmtDiff {
+pub struct FmtDiff {
     original_node: SyntaxNode,
-    edits: Vec<(AtomEdit, Option<RuleName>)>,
+    pub edits: Vec<(AtomEdit, Option<RuleName>)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct AtomEdit {
+pub struct AtomEdit {
     pub delete: TextRange,
     pub insert: SmolStr,
 }
