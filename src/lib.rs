@@ -1,9 +1,9 @@
 #[macro_use]
-mod dsl;
-mod engine;
-mod rules;
-mod tree_utils;
-mod pattern;
+pub mod dsl;
+pub mod engine;
+pub mod rules;
+pub mod tree_utils;
+pub mod pattern;
 
 use std::{borrow::Cow, fmt, fmt::Formatter};
 
@@ -18,7 +18,7 @@ use crate::dsl::RuleName;
 #[derive(Debug)]
 pub struct FmtDiff {
     original_node: SyntaxNode,
-    edits: Vec<(AtomEdit, Option<RuleName>)>,
+    pub edits: Vec<(AtomEdit, Option<RuleName>)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
