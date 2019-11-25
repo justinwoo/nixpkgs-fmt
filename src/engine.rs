@@ -1,6 +1,6 @@
 //! This module applies the rules from `super::dsl` to a `SyntaxNode`, to
 //! get a `FmtDiff`.
-mod fmt_model;
+pub mod fmt_model;
 mod indentation;
 mod spacing;
 mod fixes;
